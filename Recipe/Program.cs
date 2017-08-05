@@ -8,9 +8,41 @@ using System.Threading.Tasks;
 // Recipe170_静的メソッドのクラス名を省略したい
 using static System.Console;
 using System.Reflection;
+using System.Runtime.Serialization.Json;
+using System.Runtime.Serialization;
+using System.IO;
 
 namespace Recipe
 {
+    //Recipe_169_拡張メソッド定義
+    static class ExtInt
+    {
+        internal static int Abs(this int n)
+        {
+            return n < 0 ? -1 * n : n;
+        }
+    }
+
+    [DataContract]
+    class Rikishi
+    {
+        [DataMember(Name = "Name")]
+        public string Name { get; private set; }
+        [DataMember(Name = "rank")]
+        private string rank;
+        [DataMember(Name = "Age")]
+        public int Age { get; set; } = 30;
+        public Rikishi(string name, string rank)
+        {
+            Name = name;
+            this.rank = rank;
+        }
+        public override string ToString()
+        {
+            return $"{rank} {Name}関";
+        }
+    }
+
     class Program
     {
         void Recipe030_数字を文字列にする()
@@ -205,6 +237,17 @@ where
             // 宣言と引数の順序を入れ替えできる．
             WriteLine(div(divisor: 5, dividend: 10)); // =>2 
         }
+        void Recipe265_オブジェクトとJSONを相互に変換()
+        {
+            var rikishi = new Rikishi("琴奨菊", "大関");
+            rikishi.Age = 28;
+            var serializer = new DataContractJsonSerializer(typeof(Rikishi));
+            using (var mem = new MemoryStream())
+            {
+                serializer.WriteObject(mem, rikishi);
+                WriteLine(Encoding.UTF8.GetString(mem.ToArray()));
+            }
+        }
         void Recipe297_プロパティ名を指定してプロパティにアクセス()
         {
             var rikishi = new Rikishi("琴奨菊", "大関");
@@ -225,6 +268,11 @@ where
             var msg = $"{nameof(someVar)}に，値[{someVar}]を格納.";
             WriteLine(msg);
         }
+        void RecipeA57_バックスラッシュを意識せずにパスを組み立てる()
+        {
+            var path = Path.Combine(@"C:\Program Files (x86)", @"Microsoft Visual Studio 14.0");
+            WriteLine(path);
+        }
 
         /// <summary>
         /// Recipe A26 ユーティリティクラスを定義する．
@@ -232,14 +280,6 @@ where
         static class Utility
         {
 
-        }
-
-        static void Main(string[] args)
-        {
-            Program p = new Program();
-            p.Recipe300_変数名やメソッド名を文字列で取得();
-
-            ReadKey();
         }
 
         class Custom
@@ -279,27 +319,11 @@ where
                 sname = "undefined";
             }
         }
-    }
-    //Recipe_169_拡張メソッド定義
-    static class ExtInt
-    {
-        internal static int Abs(this int n)
+        static void Main(string[] args)
         {
-            return n < 0 ? -1 * n : n;
-        }
-    }
-    class Rikishi
-    {
-        public string Name { get; private set; }
-        private string rank;
-        public Rikishi(string name, string rank)
-        {
-            Name = name;
-            this.rank = rank;
-        }
-        public override string ToString()
-        {
-            return $"{rank} {Name}関";
+            Program p = new Program();
+            p.RecipeA57_バックスラッシュを意識せずにパスを組み立てる();
+            ReadKey();
         }
     }
 }
