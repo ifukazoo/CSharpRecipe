@@ -300,34 +300,40 @@ where
             // 宣言と引数の順序を入れ替えできる．
             WriteLine(div(divisor: 5, dividend: 10)); // =>2 
         }
-        async void Recipe248_ソケットサーバー()
+        async void Recipe248_ソケットサーバー(int port)
         {
-            var listener = new TcpListener(IPAddress.Any, 8080);
+            var listener = new TcpListener(IPAddress.Any, port);
             listener.Start();
+            WriteLine("server listenning...");
             using (var client = await listener.AcceptTcpClientAsync())
             using (var stream = client.GetStream())
             {
                 var reader = new StreamReader(stream);
                 var line = await reader.ReadLineAsync();
+                WriteLine($"server received[{line}]");
                 var writer = new StreamWriter(stream);
                 await writer.WriteLineAsync(line);
                 await writer.FlushAsync();
+                WriteLine("server echoed back.");
             }
             listener.Stop();
         }
-        async void Recipe249_ソケットクライアント()
+        async void Recipe249_ソケットクライアント(string server, int port)
         {
             using (var client = new TcpClient())
             {
-                await client.ConnectAsync("127.0.0.1", 8080);
+                await client.ConnectAsync(server, port);
                 using (var stream = client.GetStream())
                 {
+                    WriteLine("client connected.");
                     var writer = new StreamWriter(stream);
                     await Task.Delay(5000);
                     await writer.WriteLineAsync("Hello");
                     await writer.FlushAsync();
+                    WriteLine("client echoed.");
                     var reader = new StreamReader(stream);
                     var line = await reader.ReadLineAsync();
+                    WriteLine($"client received[{line}]");
                 }
             }
         }
@@ -437,8 +443,8 @@ where
         static void Main(string[] args)
         {
             Program p = new Program();
-            p.Recipe248_ソケットサーバー();
-            p.Recipe249_ソケットクライアント();
+            p.Recipe248_ソケットサーバー(8080);
+            p.Recipe249_ソケットクライアント("localhost", 8080);
             ReadKey();
         }
     }
