@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 // Recipe170_静的メソッドのクラス名を省略したい
 using static System.Console;
-using System.Reflection;
-using System.Runtime.Serialization.Json;
-using System.Runtime.Serialization;
-using System.IO;
-using System.Threading;
 
 namespace Recipe
 {
@@ -298,6 +300,37 @@ where
             // 宣言と引数の順序を入れ替えできる．
             WriteLine(div(divisor: 5, dividend: 10)); // =>2 
         }
+        async void Recipe248_ソケットサーバー()
+        {
+            var listener = new TcpListener(IPAddress.Any, 8080);
+            listener.Start();
+            using (var client = await listener.AcceptTcpClientAsync())
+            using (var stream = client.GetStream())
+            {
+                var reader = new StreamReader(stream);
+                var line = await reader.ReadLineAsync();
+                var writer = new StreamWriter(stream);
+                await writer.WriteLineAsync(line);
+                await writer.FlushAsync();
+            }
+            listener.Stop();
+        }
+        async void Recipe249_ソケットクライアント()
+        {
+            using (var client = new TcpClient())
+            {
+                await client.ConnectAsync("127.0.0.1", 8080);
+                using (var stream = client.GetStream())
+                {
+                    var writer = new StreamWriter(stream);
+                    await Task.Delay(5000);
+                    await writer.WriteLineAsync("Hello");
+                    await writer.FlushAsync();
+                    var reader = new StreamReader(stream);
+                    var line = await reader.ReadLineAsync();
+                }
+            }
+        }
         void Recipe265_オブジェクトとJSONを相互に変換()
         {
             var rikishi = new Rikishi("琴奨菊", "大関");
@@ -404,7 +437,8 @@ where
         static void Main(string[] args)
         {
             Program p = new Program();
-            p.Recipe283_非同期処理();
+            p.Recipe248_ソケットサーバー();
+            p.Recipe249_ソケットクライアント();
             ReadKey();
         }
     }
