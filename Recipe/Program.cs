@@ -23,8 +23,8 @@ namespace Recipe
         }
     }
 
-    [DataContract]
-    class Rikishi
+    [DataContract]  // for Recipe265 オブジェクトとJSONを相互に変換
+    partial class Rikishi : IComparable<Rikishi>
     {
         [DataMember(Name = "Name")]
         public string Name { get; private set; }
@@ -32,6 +32,7 @@ namespace Recipe
         private string rank;
         [DataMember(Name = "Age")]
         public int Age { get; set; } = 30;
+
         public Rikishi(string name, string rank)
         {
             Name = name;
@@ -40,6 +41,57 @@ namespace Recipe
         public override string ToString()
         {
             return $"{rank} {Name}関";
+        }
+
+        public int CompareTo(Rikishi you)
+        {
+            var d = new Dictionary<string, int>()
+            {
+                ["横綱"] = 10,
+                ["大関"] = 9,
+                ["関脇"] = 8,
+                ["小結"] = 7,
+                ["前頭"] = 6,
+            };
+            var mine = d[rank];
+            var yours = d[you.rank];
+            return mine - yours;
+        }
+
+        // デリゲート宣言
+        public delegate int Functions(int x, int y);
+
+        // デリゲート変数
+        public Functions Funcs { get; set; }
+        // イベント変数(デリゲート変数をイベント指定した，と考えればよい)
+        public event Functions events;
+        public event Functions Events
+        {
+            add
+            {
+                events += value;
+            }
+            remove
+            {
+                events -= value;
+            }
+        }
+        public void submit(int x, int y)
+        {
+            //クラス内でどちらも実行できる
+            Funcs(x, y);
+            events(x, y);
+        }
+    }
+    static class OuterRikisi
+    {
+        static public void ActionFromOutside(Rikishi r)
+        {
+            // デリゲート変数は外部からでも実行できる
+            r.Funcs(0, 1);
+
+            // イベント変数は外部からでも実行できない
+            //r.events(0, 1);  => NG
         }
     }
 
@@ -203,6 +255,14 @@ where
             array[array.Length - 1] = "白鵬";
             Array.ForEach(array, e => WriteLine(e));
         }
+        void Recipe155_ジェネリックメソッドを定義したい()
+        {
+            WriteLine(GenericMax(5, 4, 3));
+            var kotosyogiku = new Rikishi("琴奨菊", "大関");
+            var hakuho = new Rikishi("白鵬", "横綱");
+            var mitakeumi = new Rikishi("御嶽海", "前頭");
+            WriteLine(GenericMax(kotosyogiku, mitakeumi, hakuho));
+        }
         void Recipe161_引数を利用して値を返すメソッド(int a, int b, out int sum)
         {
             //var n = sum; ng
@@ -262,6 +322,7 @@ where
             rankField.SetValue(rikishi, "前頭");
             WriteLine(rikishi);
         }
+
         void Recipe300_変数名やメソッド名を文字列で取得()
         {
             var someVar = "変数";
@@ -280,6 +341,13 @@ where
         static class Utility
         {
 
+        }
+
+        // Recipe155_ジェネリックメソッドを定義
+        static T GenericMax<T>(T x, T y, T z) where T : IComparable<T>
+        {
+            List<T> a = new List<T> { x, y, z };
+            return a.Max();
         }
 
         class Custom
@@ -322,8 +390,9 @@ where
         static void Main(string[] args)
         {
             Program p = new Program();
-            p.RecipeA57_バックスラッシュを意識せずにパスを組み立てる();
+            p.Recipe155_ジェネリックメソッドを定義したい();
             ReadKey();
         }
     }
+
 }
