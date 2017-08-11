@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Runtime.Serialization.Json;
 using System.Runtime.Serialization;
 using System.IO;
+using System.Threading;
 
 namespace Recipe
 {
@@ -308,6 +309,20 @@ where
                 WriteLine(Encoding.UTF8.GetString(mem.ToArray()));
             }
         }
+        public static async Task<DateTime> getDateTimeAsync()
+        {
+            var t = await Task.Run(() =>
+            {
+                Thread.Sleep(5000);
+                return DateTime.Now;
+            });
+            return t;
+        }
+        async void Recipe283_非同期処理()
+        {
+            var result = await getDateTimeAsync();
+            Console.WriteLine(result);
+        }
         void Recipe297_プロパティ名を指定してプロパティにアクセス()
         {
             var rikishi = new Rikishi("琴奨菊", "大関");
@@ -340,7 +355,6 @@ where
         /// </summary>
         static class Utility
         {
-
         }
 
         // Recipe155_ジェネリックメソッドを定義
@@ -390,7 +404,7 @@ where
         static void Main(string[] args)
         {
             Program p = new Program();
-            p.Recipe155_ジェネリックメソッドを定義したい();
+            p.Recipe283_非同期処理();
             ReadKey();
         }
     }
