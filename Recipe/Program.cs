@@ -300,7 +300,7 @@ where
             // 宣言と引数の順序を入れ替えできる．
             WriteLine(div(divisor: 5, dividend: 10)); // =>2 
         }
-        async void Recipe248_ソケットサーバー(int port)
+        async Task Recipe248_非同期ソケットサーバー(int port)
         {
             var listener = new TcpListener(IPAddress.Any, port);
             listener.Start();
@@ -318,7 +318,7 @@ where
             }
             listener.Stop();
         }
-        async void Recipe249_ソケットクライアント(string server, int port)
+        async Task Recipe249_非同期ソケットクライアント(string server, int port)
         {
             using (var client = new TcpClient())
             {
@@ -350,7 +350,9 @@ where
         }
         public static async Task<DateTime> getDateTimeAsync()
         {
-            var t = await Task.Run(() =>
+            // 内部でawait をするメソッドは戻り値がTask<T>型になる．戻り値が必要ない場合はTask型
+            // awaitキーワードを入れることで，Taskから戻り値型のみを取り出せるかのようにコードが書ける．
+            DateTime t = await Task.Run(() =>
             {
                 Thread.Sleep(5000);
                 return DateTime.Now;
@@ -361,6 +363,23 @@ where
         {
             var result = await getDateTimeAsync();
             Console.WriteLine(result);
+        }
+        void Recipe295_非同期処理で発生した例外を調べる()
+        {
+            try
+            {
+                var t1 = Recipe248_非同期ソケットサーバー(65536);
+                var t2 = Recipe249_非同期ソケットクライアント("localhost", 80);
+                Task.WaitAll(new Task[] { t1, t2 });
+            }
+            catch (AggregateException es)
+            {
+                //foreach (var ex in es.InnerExceptions.Select(e => e is AggregateException ? e.InnerException : e))
+                foreach (var ex in es.InnerExceptions)
+                {
+                    WriteLine(ex.Message);
+                }
+            }
         }
         void Recipe297_プロパティ名を指定してプロパティにアクセス()
         {
@@ -443,8 +462,7 @@ where
         static void Main(string[] args)
         {
             Program p = new Program();
-            p.Recipe248_ソケットサーバー(8080);
-            p.Recipe249_ソケットクライアント("localhost", 8080);
+            p.Recipe295_非同期処理で発生した例外を調べる();
             ReadKey();
         }
     }
