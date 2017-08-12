@@ -402,6 +402,19 @@ where
             var msg = $"{nameof(someVar)}に，値[{someVar}]を格納.";
             WriteLine(msg);
         }
+        dynamic div2(int dividend, int divisor)
+        {
+            return new { Quotient = dividend / divisor, Remainder = dividend % divisor };
+        }
+        Tuple<int,int> div3(int dividend, int divisor)
+        {
+            return Tuple.Create(dividend / divisor, dividend % divisor);
+        }
+        void RecipeA29_メソッドから複数の値を返す()
+        {
+            WriteLine($"81 / 13 => 商:{div2(81, 13).Quotient} 剰余:{div2(81, 13).Remainder}");
+            WriteLine($"81 / 13 => 商:{div3(81, 13).Item1} 剰余:{div3(81, 13).Item2}");
+        }
         void RecipeA57_バックスラッシュを意識せずにパスを組み立てる()
         {
             var path = Path.Combine(@"C:\Program Files (x86)", @"Microsoft Visual Studio 14.0");
@@ -462,7 +475,7 @@ where
         static void Main(string[] args)
         {
             Program p = new Program();
-            p.Recipe295_非同期処理で発生した例外を調べる();
+            p.RecipeA29_メソッドから複数の値を返す();
             ReadKey();
         }
     }
